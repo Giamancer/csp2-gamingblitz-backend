@@ -4,39 +4,21 @@ const User = require('../models/User');
 const auth = require("../auth");
 const { errorHandler } = auth;
 
-module.exports.checkEmailExists = (req, res) => {
-
-    if(req.body.email.includes("@")){
-        return User.find({ email : req.body.email })
-        .then(result => {
-
-            if (result.length > 0) {
-                return res.status(409).send({ message: "Duplicate email found"});
-            } else {
-                return res.status(404).send({ message: "No duplicate email found"});
-            };
-        })
-        .catch(error => errorHandler(error, req, res));  
-    } else {
-        res.status(400).send({ message: "Invalid email format"});
-    }
-    
-};
 
 //[SECTION] User Registration
 module.exports.registerUser = (req, res) => {
 
     // Checks if the email is in the right format
     if (!req.body.email.includes("@")){
-        return res.status(400).send({ message: 'Invalid email format' });
+        return res.status(400).send({ message: 'Email invalid' });
     }
     // Checks if the mobile number has the correct number of characters
     else if (req.body.mobileNo.length !== 11){
-        return res.status(400).send({ message: 'Mobile number is invalid' });
+        return res.status(400).send({ message: 'Mobile number invalid' });
     }
     // Checks if the password has atleast 8 characters
     else if (req.body.password.length < 8) {
-        return res.status(400).send({ message: 'Password must be atleast 8 characters long' });
+        return res.status(400).send({ message: 'Password must be atleast 8 characters' });
     // If all needed requirements are achieved
     } else {
         let newUser = new User({
@@ -72,18 +54,18 @@ module.exports.loginUser = (req, res) => {
                         access : auth.createAccessToken(result)
                         });
                 } else {
-                    return res.status(401).send({ message: 'Incorrect email or password' });
+                    return res.status(401).send({ message: 'Email and password do not match' });
                 }
             }
         })
         .catch(error => errorHandler(error, req, res)); 
     } else {
-        res.status(400).send({ message: 'Invalid email format' });
+        res.status(400).send({ message: 'Invalid email' });
     }
     
 };
 
-module.exports.getProfile = (req, res) => {
+module.exports.retrieveUserDetails = (req, res) => {
     return User.findById(req.user.id)
     .then(user => {
 
@@ -100,6 +82,47 @@ module.exports.getProfile = (req, res) => {
 };
 
 
+module.exports.updateUserAsAdmin = (req, res) => {
+    // Check if the requesting user is an admin
+    if (!req.user.isAdmin) {
+        return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    // Get the user ID from the request body
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    // Find the user and update their isAdmin status
+    User.findByIdAndUpdate(userId, { isAdmin: true }, { new: true })
+        .then(updatedUser => {
+            if (!updatedUser) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            // Ensure password is hidden before sending response
+            updatedUser.password = "";
+
+            return res.status(200).json({ updatedUser });
+        })
+        .catch(error => {
+            res.status(500).json({
+                error: "Failed in Find",
+                details: {
+                    stringValue: error.stringValue || "",
+                    valueType: typeof userId,
+                    kind: error.kind || "ObjectId",
+                    path: error.path || "_id",
+                    reason: error.reason || {},
+                    name: error.name || "Error",
+                    message: error.message
+                }
+            });
+        });
+};
+
 module.exports.resetPassword = async (req, res) => {
     try {
         // Hash new password
@@ -114,52 +137,47 @@ module.exports.resetPassword = async (req, res) => {
     }
 };
 
-module.exports.updateProfile = async(req, res) => {
-  try {
-    // Get the user ID from the authenticated token
+module.exports.updatePassword = (req, res) => {
     const userId = req.user.id;
+    const { newPassword } = req.body;
 
-    // Retrieve the updated profile information from the request body
-    const { firstName, lastName, mobileNumber } = req.body;
-
-    // Update the user's profile in the database
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { firstName, lastName, mobileNumber },
-      { new: true }
-    );
-
-    res.json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Failed to update profile' });
-  }
-}
-
-module.exports.updateUserAsAdmin = async (req, res) => {
-    try {
-        // Check if the requesting user is an admin
-        if (!req.user.isAdmin) {
-            return res.status(403).json({ message: "Access denied. Admins only." });
-        }
-
-        // Get the user ID from request body
-        const { userId } = req.body;
-
-        if (!userId) {
-            return res.status(400).json({ message: "User ID is required." });
-        }
-
-        // Find the user and update their isAdmin status
-        const updatedUser = await User.findByIdAndUpdate(userId, { isAdmin: true }, { new: true });
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        res.status(200).json({ message: "User updated as admin successfully" });
-
-    } catch (error) {
-        res.status(500).json({ message: "An error occurred", error: error.message });
+    // Check if the new password is provided and meets requirements
+    if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
+
+    // Hash the new password
+    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+    // Update the user's password in the database
+    User.findByIdAndUpdate(userId, { password: hashedPassword }, { new: true })
+        .then(updatedUser => {
+            if (!updatedUser) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            res.status(201).json({ message: "Password reset successfully" });
+        })
+        .catch(error => {
+            res.status(500).json({ error: "Failed to update password", details: error.message });
+        });
 };
+
+/*module.exports.checkEmailExists = (req, res) => {
+
+    if(req.body.email.includes("@")){
+        return User.find({ email : req.body.email })
+        .then(result => {
+
+            if (result.length > 0) {
+                return res.status(409).send({ message: "Duplicate email found"});
+            } else {
+                return res.status(404).send({ message: "No duplicate email found"});
+            };
+        })
+        .catch(error => errorHandler(error, req, res));  
+    } else {
+        res.status(400).send({ message: "Invalid email format"});
+    }
+    
+};*/

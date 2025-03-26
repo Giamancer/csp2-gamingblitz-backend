@@ -52,10 +52,10 @@ mongoose.connect(process.env.MONGODB_STRING);
 mongoose.connection.once('open', () => console.log("Now connected to MongoDB Atlas."));
 
 //[SECTION] Backend Routes 
-app.use("/userRoutes", userRoutes);
-app.use("/productRoutes", productRoutes);
-app.use("/orderRoutes", orderRoutes);
-app.use("/cartRoutes", cartRoutes);
+app.use("/users", userRoutes);
+app.use("/product", productRoutes);
+app.use("/order", orderRoutes);
+app.use("/cart", cartRoutes);
 
 
 // [SECTION] Server Gateway Response
