@@ -33,17 +33,16 @@ module.exports.createProduct = (req, res) => {
 module.exports.getAllProducts = (req, res) => {
     Product.find({})
         .then((products) => {
-            res.status(200).json({
-                message: "All products retrieved successfully",
-                products: products.map(product => ({
-                    _id: product._id,
-                    name: product.name,
-                    description: product.description,
-                    price: product.price,
-                    isActive: product.isActive,
-                    createdOn: product.createdOn
-                }))
-            });
+            const formattedProducts = products.map(product => ({
+                _id: product._id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                isActive: product.isActive,
+                createdOn: product.createdOn
+            }));
+
+            res.status(200).json(formattedProducts); 
         })
         .catch((err) => {
             res.status(500).json({ error: "Failed to retrieve products" });
