@@ -11,11 +11,11 @@ router.post("/register", userController.registerUser);
 
 router.post("/login", userController.loginUser);
 
-router.post("/retrieve-user", verify, userController.retrieveUserDetails);
+router.get("/details", verify, userController.retrieveUserDetails);
 
-router.put('/update-user-as-admin', verify, userController.updateUserAsAdmin);
+router.put("/:id/set-as-admin", verify, userController.updateUserAsAdmin);
 
-router.put('/update-password', verify, userController.updatePassword);
+router.put("/update-password", verify, userController.updatePassword);
 
 /*router.post("/check-email", userController.checkEmailExists);
 

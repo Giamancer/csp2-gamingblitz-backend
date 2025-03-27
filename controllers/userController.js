@@ -71,7 +71,7 @@ module.exports.retrieveUserDetails = (req, res) => {
 
         if(!user){
             // if the user has invalid token, send a message 'invalid signature'.
-            return res.status(403).send({ message: 'invalid signature' })
+            return res.status(404).send({ message: 'user not found' })
         }else {
             // if the user is found, return the user.
             user.password = "";
@@ -88,8 +88,7 @@ module.exports.updateUserAsAdmin = (req, res) => {
         return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
-    // Get the user ID from the request body
-    const { userId } = req.body;
+    const { userId } = req.params.id;
 
     if (!userId) {
         return res.status(400).json({ message: "User ID is required." });
@@ -123,19 +122,6 @@ module.exports.updateUserAsAdmin = (req, res) => {
         });
 };
 
-module.exports.resetPassword = async (req, res) => {
-    try {
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
-
-        // Update user password in DB
-        await User.findByIdAndUpdate(userId, { password: hashedPassword });
-
-        res.json({ message: "Password successfully reset" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-};
 
 module.exports.updatePassword = (req, res) => {
     const userId = req.user.id;
@@ -180,4 +166,18 @@ module.exports.updatePassword = (req, res) => {
         res.status(400).send({ message: "Invalid email format"});
     }
     
+};*/
+
+/*module.exports.resetPassword = async (req, res) => {
+    try {
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+
+        // Update user password in DB
+        await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+        res.json({ message: "Password successfully reset" });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
 };*/
