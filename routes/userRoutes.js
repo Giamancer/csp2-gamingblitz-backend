@@ -13,7 +13,7 @@ router.post("/login", userController.loginUser);
 
 router.get("/details", verify, userController.retrieveUserDetails);
 
-router.put("/:id/set-as-admin", verify, userController.updateUserAsAdmin);
+router.put("/:userId/set-as-admin", verify, userController.updateUserAsAdmin);
 
 router.put("/update-password", verify, userController.updatePassword);
 

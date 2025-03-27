@@ -88,7 +88,7 @@ module.exports.updateUserAsAdmin = (req, res) => {
         return res.status(403).json({ message: "Access denied. Admins only." });
     }
 
-    const { userId } = req.params.id;
+    const userId = req.params.userId;
 
     if (!userId) {
         return res.status(400).json({ message: "User ID is required." });
