@@ -49,6 +49,16 @@ module.exports.getAllProducts = (req, res) => {
         });
 };
 
+// [SECTION] Active Product Info (All)
+exports.getActiveProducts = async (req, res) => {
+    try {
+        const activeProducts = await Product.find({ isActive: true }); // Fetch active products
+        res.status(200).json(activeProducts); // Send response
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // [SECTION] Update Product Info (Admin Only)
 exports.updateProduct = async (req, res) => {
     try {
