@@ -53,7 +53,7 @@ mongoose.connection.once('open', () => console.log("Now connected to MongoDB Atl
 
 //[SECTION] Backend Routes 
 app.use("/users", userRoutes);
-app.use("/product", productRoutes);
+app.use("/products", productRoutes);
 app.use("/order", orderRoutes);
 app.use("/cart", cartRoutes);
 

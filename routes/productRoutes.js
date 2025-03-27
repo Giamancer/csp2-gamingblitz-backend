@@ -11,6 +11,15 @@ router.post("/", verify, verifyAdmin, productController.createProduct);
 
 router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
+// Route for updating a product
+router.patch('/:id/update', verify, verifyAdmin, productController.updateProduct);
+
+// Route for archiving a product
+router.patch('/:id/archive', verify, verifyAdmin, productController.archiveProduct);
+
+// Route for activating a product
+router.patch('/:id/activate', verify, verifyAdmin, productController.activateProduct);
+
 /*router.post("/", verify, verifyAdmin, courseController.addCourse);
 
 router.get("/all", verify, verifyAdmin, courseController.getAllCourses);

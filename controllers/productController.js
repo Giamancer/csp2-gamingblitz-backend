@@ -50,6 +50,58 @@ module.exports.getAllProducts = (req, res) => {
         });
 };
 
+// [SECTION] Update Product Info (Admin Only)
+exports.updateProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const updateData = req.body;
+
+        const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.status(200).json({ message: "Product updated successfully", updatedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating product", error: error.message });
+    }
+};
+
+// [SECTION] Archive Product (Admin Only)
+exports.archiveProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+
+        const archivedProduct = await Product.findByIdAndUpdate(productId, { isActive: false }, { new: true });
+
+        if (!archivedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.status(200).json({ message: "Product archived successfully", archivedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error archiving product", error: error.message });
+    }
+};
+
+// [SECTION] Activate Product (Admin Only)
+exports.activateProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+
+        const activatedProduct = await Product.findByIdAndUpdate(productId, { isActive: true }, { new: true });
+
+        if (!activatedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.status(200).json({ message: "Product activated successfully", activatedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error activating product", error: error.message });
+    }
+};
+
 /*module.exports.addCourse = (req, res) => {
 
     let newCourse = new Course({
