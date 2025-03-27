@@ -13,9 +13,9 @@ router.post("/login", userController.loginUser);
 
 router.get("/details", verify, userController.retrieveUserDetails);
 
-router.put("/:userId/set-as-admin", verify, userController.updateUserAsAdmin);
+router.patch("/:userId/set-as-admin", verify, userController.setAsAdmin);
 
-router.put("/update-password", verify, userController.updatePassword);
+router.patch("/update-password", verify, userController.updatePassword);
 
 /*router.post("/check-email", userController.checkEmailExists);
 

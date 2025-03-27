@@ -82,7 +82,7 @@ module.exports.retrieveUserDetails = (req, res) => {
 };
 
 
-module.exports.updateUserAsAdmin = (req, res) => {
+module.exports.setAsAdmin = (req, res) => {
     // Check if the requesting user is an admin
     if (!req.user.isAdmin) {
         return res.status(403).json({ message: "Access denied. Admins only." });
