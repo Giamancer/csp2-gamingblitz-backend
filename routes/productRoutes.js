@@ -11,14 +11,16 @@ router.post("/", verify, verifyAdmin, productController.createProduct);
 
 router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
+router.get("/active", verify, verifyAdmin, productController.getActiveProducts);
+
 // Route for updating a product
-router.patch('/:id/update', verify, verifyAdmin, productController.updateProduct);
+router.patch('/:productId/update', verify, verifyAdmin, productController.updateProduct);
 
 // Route for archiving a product
-router.patch('/:id/archive', verify, verifyAdmin, productController.archiveProduct);
+router.patch('/:productId/archive', verify, verifyAdmin, productController.archiveProduct);
 
 // Route for activating a product
-router.patch('/:id/activate', verify, verifyAdmin, productController.activateProduct);
+router.patch('/:productId/activate', verify, verifyAdmin, productController.activateProduct);
 
 /*router.post("/", verify, verifyAdmin, courseController.addCourse);
 
