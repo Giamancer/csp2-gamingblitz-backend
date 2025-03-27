@@ -7,6 +7,9 @@ const {verify, verifyAdmin} = auth;
 //[SECTION] Activity: Routing Component
 const router = express.Router();
 
+router.post("/", verify, verifyAdmin, productController.createProduct);
+
+router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
 /*router.post("/", verify, verifyAdmin, courseController.addCourse);
 

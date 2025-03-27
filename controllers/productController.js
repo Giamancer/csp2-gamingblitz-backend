@@ -2,6 +2,54 @@
 const Product = require("../models/Product");
 const { errorHandler } = require("../auth");
 
+module.exports.createProduct = (req, res) => {
+    const { name, description, price } = req.body;
+
+    const newProduct = new Product({
+        name,
+        description,
+        price
+    });
+
+    newProduct.save()
+        .then((savedProduct) => {
+            res.status(201).json({
+                message: "Product created successfully",
+                product: {
+                    _id: savedProduct._id,
+                    name: savedProduct.name,
+                    description: savedProduct.description,
+                    price: savedProduct.price,
+                    isActive: savedProduct.isActive,
+                    createdOn: savedProduct.createdOn
+                }
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({ error: errorHandler(err, req, res) });
+        });
+};
+
+module.exports.getAllProducts = (req, res) => {
+    Product.find({})
+        .then((products) => {
+            res.status(200).json({
+                message: "All products retrieved successfully",
+                products: products.map(product => ({
+                    _id: product._id,
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    isActive: product.isActive,
+                    createdOn: product.createdOn
+                }))
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({ error: "Failed to retrieve products" });
+        });
+};
+
 /*module.exports.addCourse = (req, res) => {
 
     let newCourse = new Course({
