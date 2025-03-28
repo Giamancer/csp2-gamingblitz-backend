@@ -19,7 +19,7 @@ require('dotenv').config();
 Analogy
     Pack the gift and provide a lock with the secret code as the key
 */
-module.exports.createAccessToken = (user) => {
+const createAccessToken = (user) => {
     // The data will be received from the registration form
     // When the user logs in, a token will be created with user's information
     const data = {
@@ -44,7 +44,7 @@ Analogy
 - Verify will be used as a middleware in ExpressJS. Functions added as argument in an expressJS route are considered as middleware and is able to receive the request and response objects as well as the next() function. Middlewares will be further elaborated on later sessions.
 */
 
-module.exports.verify = (req, res, next) => {
+const verify = (req, res, next) => {
     console.log(req.headers.authorization);
 
     // "req.headers.authorization" contains sensitive data and especially our token
@@ -100,7 +100,7 @@ module.exports.verify = (req, res, next) => {
 // The "verify" method is also the one responsible for updating the "req" object to include the "user" details/decoded token in the request body.
 // Being an ExpressJS middleware, it should also be able to receive the next() method.
 
-module.exports.verifyAdmin = (req, res, next) => {
+const verifyAdmin = (req, res, next) => {
 
     // console.log("result from verifyAdmin method");
     // console.log(req.user);
@@ -120,7 +120,7 @@ module.exports.verifyAdmin = (req, res, next) => {
 
 
 // [SECTION] Error Handler
-module.exports.errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
     // Log the error
     console.error(err);
 
@@ -139,3 +139,23 @@ module.exports.errorHandler = (err, req, res, next) => {
     });
 };
 
+const verifyJWT = (req, res, next) => {
+    const token = req.header("Authorization");
+    if (!token) return res.status(401).json({ message: "Access Denied" });
+
+    try {
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = verified;
+        next();
+    } catch (err) {
+        res.status(400).json({ message: "Invalid Token" });
+    }
+};
+
+module.exports = {
+    createAccessToken,
+    verify,
+    verifyAdmin,
+    errorHandler,
+    verifyJWT // ✅ Now included properly
+};
