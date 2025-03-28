@@ -13,6 +13,8 @@ router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
 router.get("/active", verify, verifyAdmin, productController.getActiveProducts);
 
+router.get("/:productId", productController.getProduct);
+
 // Route for updating a product
 router.patch('/:productId/update', verify, verifyAdmin, productController.updateProduct);
 

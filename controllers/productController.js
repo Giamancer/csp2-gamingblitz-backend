@@ -59,6 +59,22 @@ exports.getActiveProducts = async (req, res) => {
     }
 };
 
+// Retrieve Single Product
+module.exports.getProduct = (req, res) => {
+    const productId = req.params.productId;
+
+    Product.findById(productId)
+        .then((product) => {
+            if (!product) {
+                return res.status(404).json({ message: "Product not found" });
+            }
+            res.status(200).json(product);
+        })
+        .catch((error) => {
+            res.status(500).json({ message: "Error retrieving product", error: error.message });
+        });
+};
+
 // [SECTION] Update Product Info (Admin Only)
 exports.updateProduct = async (req, res) => {
     try {
