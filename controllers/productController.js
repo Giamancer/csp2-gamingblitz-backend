@@ -113,17 +113,25 @@ exports.archiveProduct = async (req, res) => {
 // [SECTION] Activate Product (Admin Only)
 exports.activateProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
+        console.log("Received product ID:", req.params.id); // Log the received ID
 
-        const activateProduct = await Product.findByIdAndUpdate(productId, { isActive: true }, { new: true });
+        const product = await Product.findById(req.params.id);
 
-        if (!activateProduct) {
+        console.log("Found product:", product); // Log the retrieved product
+
+        if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        res.status(200).json({ message: "Product activated successfully", activateProduct });
+        product.status = 'active';
+        await product.save();
+
+        console.log("Product activated:", product); // Log the updated product
+
+        res.status(200).json({ message: "Product activated successfully", product });
     } catch (error) {
-        res.status(500).json({ message: "Error activating product", error: error.message });
+        console.error("Error activating product:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
