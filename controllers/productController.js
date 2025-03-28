@@ -2,6 +2,7 @@
 const Product = require("../models/Product");
 const { errorHandler } = require("../auth");
 
+// Create Product
 module.exports.createProduct = (req, res) => {
     const { name, description, price } = req.body;
 
@@ -30,6 +31,7 @@ module.exports.createProduct = (req, res) => {
         });
 };
 
+// Retrieve All Products
 module.exports.getAllProducts = (req, res) => {
     Product.find({})
         .then((products) => {
@@ -49,7 +51,7 @@ module.exports.getAllProducts = (req, res) => {
         });
 };
 
-// [SECTION] Active Product Info (All)
+// Retrieve All Active Products
 exports.getActiveProducts = async (req, res) => {
     try {
         const activeProducts = await Product.find({ isActive: true }); // Fetch active products
@@ -75,10 +77,10 @@ module.exports.getProduct = (req, res) => {
         });
 };
 
-// [SECTION] Update Product Info (Admin Only)
+// Update Product Info
 exports.updateProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const productId = req.params.productId;
         const updateData = req.body;
 
         const updatedProduct = await Product.findByIdAndUpdate(productId, updateData, { new: true });
@@ -93,10 +95,10 @@ exports.updateProduct = async (req, res) => {
     }
 };
 
-// [SECTION] Archive Product (Admin Only)
+// Archive Product
 exports.archiveProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const productId = req.params.productId;
 
         const archivedProduct = await Product.findByIdAndUpdate(productId, { isActive: false }, { new: true });
 
@@ -110,232 +112,24 @@ exports.archiveProduct = async (req, res) => {
     }
 };
 
-// [SECTION] Activate Product (Admin Only)
-exports.activateProduct = async (req, res) => {
-    try {
-        console.log("Received product ID:", req.params.id); // Log the received ID
+// Activate Product
+module.exports.activateProduct = (req, res) => {
+    const productId = req.params.productId;
 
-        const product = await Product.findById(req.params.id);
-
-        console.log("Found product:", product); // Log the retrieved product
-
-        if (!product) {
-            return res.status(404).json({ message: "Product not found" });
-        }
-
-        product.status = 'active';
-        await product.save();
-
-        console.log("Product activated:", product); // Log the updated product
-
-        res.status(200).json({ message: "Product activated successfully", product });
-    } catch (error) {
-        console.error("Error activating product:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-};
-
-/*module.exports.addCourse = (req, res) => {
-
-    let newCourse = new Course({
-        name : req.body.name,
-        description : req.body.description,
-        price : req.body.price
-    });
-
-    Course.findOne({ name: req.body.name})
-    .then(existingCourse => {
-        if (existingCourse){
-            return res.status(409).send({ message: 'Course already exists'});
-        } else {
-            return newCourse.save()
-            .then(result => 
-                res.status(201).send({
-                    success: true,
-                    message: 'Course added successfully',
-                    result: result
-                }))
-            .catch(error => 
-                errorHandler(error, req, res));
-        }
-    })
-    .catch(error => errorHandler(error, req, res));  
-}; 
-
-
-module.exports.getAllCourses = (req, res) => {
-    return Course.find({})
-    .then(result => {
-        // if the result is not null send status 30 and its result
-        if(result.length > 0){
-            return res.status(200).send(result);
-        }
-        else{
-            // 404 for not found courses
-            return res.status(404).send({ message: 'No courses found'});
-        }
-    })
-    .catch(error => errorHandler(error, req, res));
-};
-
-module.exports.getAllActive = (req, res) => {
-
-    Course.find({ isActive : true }).then(result => {
-        // if the result is not null
-        if (result.length > 0){
-            // send the result as a response
-            return res.status(200).send(result);
-        }
-        // if there are no results found
-        else {
-            // send the message as the response
-            return res.status(404).send({ message: 'No active courses found' })
-        }
-    }).catch(err => res.status(500).send(err));
-
-};
-
-
-module.exports.getCourse = (req, res) => {
-    Course.findById(req.params.id)
-    .then(course => {
-        if(course) {
-            return res.status(200).send(course);
-        } else {
-            return res.status(404).send({ message: 'Course not found' });
-        }
-    })
-    .catch(error => errorHandler(error, req, res)); 
-};
-
-
-module.exports.updateCourse = (req, res)=>{
-
-    let updatedCourse = {
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price
-    }
-
-    return Course.findByIdAndUpdate(req.params.courseId, updatedCourse)
-    .then(course => {
-        if (course) {
-            res.status(200).send({ success: true, 
-                message: 'Course updated successfully' });
-        } else {
-            res.status(404).send({ message: 'Course not found' });
-        }
-    })
-    .catch(error => errorHandler(error, req, res));
-};
-
-module.exports.archiveCourse = (req, res) => {
-  
-    let updateActiveField = {
-        isActive: false
-    };
-
-    Course.findByIdAndUpdate(req.params.courseId, updateActiveField)
-        .then(course => {
-            // Check if a course was found
-            if (course) {
-                // If course found, check if it was already archived
-                if (!course.isActive) {
-                    // If course already archived, return a 200 status with a message indicating "Course already archived".
-                    return res.status(200).send({ 
-                        message: 'Course already archived',
-                        course: course
-                        });
-                }
-                // If course not archived, return a 200 status with a boolean true.
-                return res.status(200).send({ 
-                            success: true, 
-                            message: 'Course archived successfully'
-                        });
-            } else {
-                // If course not found, return a 404 status with a boolean false.
-                return res.status(404).send({ message: 'Course not found' });
+    Product.findById(productId)
+        .then((product) => {
+            if (!product) {
+                return res.status(404).json({ message: "Product not found" });
             }
+
+            product.isActive = true;
+            return product.save();
         })
-        .catch(error => errorHandler(error, req, res));
-};
-
-
-module.exports.activateCourse = (req, res) => {
-  
-    let updateActiveField = {
-        isActive: true
-    }
-
-    Course.findByIdAndUpdate(req.params.courseId, updateActiveField)
-        .then(course => {
-            // Check if a course was found
-            if (course) {
-                // If course found, check if it was already activated
-                if (course.isActive) {
-                    // If course already activated, return a 200 status with a message indicating "Course already activated".
-                    return res.status(200).send({ 
-                        message: 'Course already activated', 
-                        course: course
-                    });
-                }
-                // If course not yet activated, return a 200 status with a boolean true.
-                return res.status(200).send({
-                    success: true,
-                    message: 'Course activated successfully'
-                });
-            } else {
-                // If course not found, return a 404 status with a boolean false.
-                return res.status(404).send({ message: 'Course not found' });
-            }
+        .then((updatedProduct) => {
+            res.status(200).json({ message: "Product activated successfully", updatedProduct });
         })
-        .catch(error => errorHandler(error, req, res));
+        .catch((error) => {
+            res.status(500).json({ message: "Internal server error", error: error.message });
+        });
 };
 
-module.exports.searchCoursesByName = async (req, res) => {
-    try {
-        const { courseName } = req.body;
-    
-        // Use a regular expression to perform a case-insensitive search
-        const courses = await Course.find({
-        name: { $regex: courseName, $options: 'i' }
-        });
-    
-        res.json(courses);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-
-module.exports.searchCoursesByPrice = async (req, res) => {
-    try {
-        const { minPrice, maxPrice } = req.body;
-
-        // Ensure both minPrice and maxPrice are provided
-        if (minPrice === undefined || maxPrice === undefined) {
-            return res.status(400).json({ message: "Both minPrice and maxPrice are required." });
-        }
-
-        // Validate price range
-        if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
-            return res.status(400).json({ message: "Invalid price range." });
-        }
-
-        // Search for courses within the given price range
-        const courses = await Course.find({
-            price: { $gte: minPrice, $lte: maxPrice },
-            isActive: true // Ensuring only active courses are returned
-        });
-
-        // If no courses found
-        if (courses.length === 0) {
-            return res.status(404).json({ message: "No courses found within this price range." });
-        }
-
-        res.status(200).json(courses);
-
-    } catch (error) {
-        res.status(500).json({ message: "An error occurred.", error: error.message });
-    }
-};*/

@@ -5,7 +5,7 @@ const auth = require("../auth");
 const { errorHandler } = auth;
 
 
-//[SECTION] User Registration
+//User Registration
 module.exports.registerUser = (req, res) => {
 
     // Checks if the email is in the right format
@@ -39,7 +39,7 @@ module.exports.registerUser = (req, res) => {
 };
 
 
-//[SECTION] User Login
+//User Login
 module.exports.loginUser = (req, res) => {
     if(req.body.email.includes("@")){
         return User.findOne({ email : req.body.email })
@@ -65,6 +65,7 @@ module.exports.loginUser = (req, res) => {
     
 };
 
+// Retrieve User Details
 module.exports.retrieveUserDetails = (req, res) => {
     return User.findById(req.user.id)
     .then(user => {
@@ -81,7 +82,7 @@ module.exports.retrieveUserDetails = (req, res) => {
     .catch(error => errorHandler(error, req, res));
 };
 
-
+// Set as Admin
 module.exports.setAsAdmin = (req, res) => {
     // Check if the requesting user is an admin
     if (!req.user.isAdmin) {
@@ -122,7 +123,7 @@ module.exports.setAsAdmin = (req, res) => {
         });
 };
 
-
+// Update Password
 module.exports.updatePassword = (req, res) => {
     const userId = req.user.id;
     const { newPassword } = req.body;
@@ -148,36 +149,3 @@ module.exports.updatePassword = (req, res) => {
             res.status(500).json({ error: "Failed to update password", details: error.message });
         });
 };
-
-/*module.exports.checkEmailExists = (req, res) => {
-
-    if(req.body.email.includes("@")){
-        return User.find({ email : req.body.email })
-        .then(result => {
-
-            if (result.length > 0) {
-                return res.status(409).send({ message: "Duplicate email found"});
-            } else {
-                return res.status(404).send({ message: "No duplicate email found"});
-            };
-        })
-        .catch(error => errorHandler(error, req, res));  
-    } else {
-        res.status(400).send({ message: "Invalid email format"});
-    }
-    
-};*/
-
-/*module.exports.resetPassword = async (req, res) => {
-    try {
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
-
-        // Update user password in DB
-        await User.findByIdAndUpdate(userId, { password: hashedPassword });
-
-        res.json({ message: "Password successfully reset" });
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
-    }
-};*/

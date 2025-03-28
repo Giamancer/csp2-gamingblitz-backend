@@ -7,23 +7,21 @@ const { verify } = require("../auth");
 //[SECTION] Routing Component
 const router = express.Router();
 
+// Register User
 router.post("/register", userController.registerUser);
 
+// Login User
 router.post("/login", userController.loginUser);
 
+// Retrieve User Details
 router.get("/details", verify, userController.retrieveUserDetails);
 
+// Set as Admin
 router.patch("/:userId/set-as-admin", verify, userController.setAsAdmin);
 
+// Update Password
 router.patch("/update-password", verify, userController.updatePassword);
 
-/*router.post("/check-email", userController.checkEmailExists);
-
-router.post("/details", verify, userController.getProfile);
-
-router.post("/reset-password", verify, userController.resetPassword);
-
-*/
 module.exports = router;
 
 

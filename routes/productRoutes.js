@@ -7,43 +7,26 @@ const {verify, verifyAdmin} = auth;
 //[SECTION] Activity: Routing Component
 const router = express.Router();
 
+// Create Product
 router.post("/", verify, verifyAdmin, productController.createProduct);
 
+// Retrieve All Products
 router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
+// Retrieve All Active Products
 router.get("/active", verify, verifyAdmin, productController.getActiveProducts);
 
+// Retrieve Single Product
 router.get("/:productId", productController.getProduct);
 
-// Route for updating a product
+// Update Product Info
 router.patch('/:productId/update', verify, verifyAdmin, productController.updateProduct);
 
-// Route for archiving a product
+// Archive Product
 router.patch('/:productId/archive', verify, verifyAdmin, productController.archiveProduct);
 
-// Route for activating a product
+// Activate Product
 router.patch('/:productId/activate', verify, verifyAdmin, productController.activateProduct);
-
-/*router.post("/", verify, verifyAdmin, courseController.addCourse);
-
-router.get("/all", verify, verifyAdmin, courseController.getAllCourses);
-
-router.get("/", courseController.getAllActive);
-
-router.get("/specific/:id", courseController.getCourse);
-
-router.patch("/:courseId", verify, verifyAdmin, courseController.updateCourse);
-
-router.patch("/:courseId/archive", verify, verifyAdmin, courseController.archiveCourse);
-
-router.patch("/:courseId/activate", verify, verifyAdmin, courseController.activateCourse);
-
-
-//[SECTION] Route for searching courses by name
-// Update endpoint to remove /courses as we already group our routes under this in index.js
-router.post('/search', courseController.searchCoursesByName);
-
-router.post("/searchPrice", courseController.searchCoursesByPrice);*/
 
 
 module.exports = router;
