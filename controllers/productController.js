@@ -99,13 +99,13 @@ exports.activateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
 
-        const activatedProduct = await Product.findByIdAndUpdate(productId, { isActive: true }, { new: true });
+        const activateProduct = await Product.findByIdAndUpdate(productId, { isActive: true }, { new: true });
 
-        if (!activatedProduct) {
+        if (!activateProduct) {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        res.status(200).json({ message: "Product activated successfully", activatedProduct });
+        res.status(200).json({ message: "Product activated successfully", activateProduct });
     } catch (error) {
         res.status(500).json({ message: "Error activating product", error: error.message });
     }
