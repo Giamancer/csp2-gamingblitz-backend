@@ -7,6 +7,7 @@ const { verifyJWT } = require("../auth");
 
 const router = express.Router();
 
+router.get("/active", verify, cartController.getActiveCart);
 
 // Add to Cart (Non-Admin)
 router.post("/add-to-cart", verify, cartController.addToCart);
