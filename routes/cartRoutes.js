@@ -6,10 +6,13 @@ const { verify, verifyAdmin } = auth;
 
 const router = express.Router();
 
-/*router.post('/enroll', verify, enrollmentController.enroll);
+// Retrieve User's Cart
+router.get("/get-cart", verify, cartController.getCart);
 
-router.get('/get-enrollments', verify, enrollmentController.getEnrollments);
+// Add To Cart
+router.post("/add-to-cart", verify, cartController.addToCart);
 
-router.put('/update-status', verify, verifyAdmin, enrollmentController.updateEnrollmentStatus);
-*/
+// Update Cart Quantity
+router.patch("/update-cart-quantity", verify, cartController.updateCartQuantity);
+
 module.exports = router;

@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "dfc0e696-183f-4b47-9807-0b830c312526",
+		"name": "Capstone 2: s53: Stephen and Gia",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42921802"
+	},
+	"item": [
+		{
+			"name": "Add to Cart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWQxMzYyMDhjZTg1YzE4MGRkMTE0NiIsImVtYWlsIjoiZ2NjQG1haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0MzU5MDI3N30.ZqJvHRZ0jWpIulKF4Esi3lkIU_HEqos_kDJst1xQVrc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"productId\": \"67ed07f94ea9318a43fd4232\",\r\n    \"quantity\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/cart/add-to-cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"cart",
+						"add-to-cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve User's Cart",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWQxMzYyMDhjZTg1YzE4MGRkMTE0NiIsImVtYWlsIjoiZ2NjQG1haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0MzU5MDI3N30.ZqJvHRZ0jWpIulKF4Esi3lkIU_HEqos_kDJst1xQVrc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/cart/get-cart",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"cart",
+						"get-cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Cart Quantity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWQxMzYyMDhjZTg1YzE4MGRkMTE0NiIsImVtYWlsIjoiZ2NjQG1haWwuY29tIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc0MzU5MDI3N30.ZqJvHRZ0jWpIulKF4Esi3lkIU_HEqos_kDJst1xQVrc",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"productId\": \"67ed07f94ea9318a43fd4232\",\r\n    \"newQuantity\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/cart/update-cart-quantity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"cart",
+						"update-cart-quantity"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
