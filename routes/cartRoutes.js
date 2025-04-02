@@ -6,12 +6,6 @@ const { verify, verifyAdmin } = auth;
 
 const router = express.Router();
 
-console.log("Cart routes registered:");
-console.log(" - POST /add-to-cart");
-console.log(" - GET /get-cart");
-console.log(" - PATCH /update-cart-quantity");
-console.log(" - GET /active");
-
 // Retrieve User's Cart
 router.get("/get-cart", verify, cartController.getCart);
 

@@ -100,6 +100,12 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: 'Invalid quantity' });
     }
 
+    // Find the active product by its ID
+    const product = await Product.findById(productId);
+    if (!product || !product.isActive) {
+      return res.status(404).json({ message: 'Product is not available or not active' });
+    }
+
     // Find the user's cart
     let cart = await Cart.findOne({ userId });
 
@@ -114,14 +120,9 @@ exports.addToCart = async (req, res) => {
     if (existingItem) {
       // If the item exists, update the quantity and subtotal
       existingItem.quantity += quantity;
-      existingItem.subtotal = existingItem.quantity * existingItem.productId.price;
+      existingItem.subtotal = existingItem.quantity * product.price;
     } else {
       // If the item doesn't exist, add it to the cart
-      const product = await Product.findById(productId);
-      if (!product) {
-        return res.status(404).json({ message: 'Product not found' });
-      }
-
       cart.cartItems.push({
         productId,
         quantity,
@@ -203,6 +204,12 @@ exports.updateCartQuantity = async (req, res) => {
       return res.status(400).json({ message: 'Invalid quantity' });
     }
 
+    // Find the active product by its ID
+    const product = await Product.findById(productId);
+    if (!product || !product.isActive) {
+      return res.status(404).json({ message: 'Product is not available or not active' });
+    }
+
     // Find the user's cart
     let cart = await Cart.findOne({ userId }).populate('cartItems.productId', 'price');
 
@@ -217,13 +224,6 @@ exports.updateCartQuantity = async (req, res) => {
     // If the item doesn't exist in the cart, return an error
     if (itemIndex === -1) {
       return res.status(404).json({ message: 'Item not found in the cart' });
-    }
-
-    const product = cart.cartItems[itemIndex].productId;
-
-    // Ensure the price is a valid number
-    if (isNaN(product.price)) {
-      return res.status(400).json({ message: 'Invalid product price' });
     }
 
     // Update the quantity and recalculate the subtotal
