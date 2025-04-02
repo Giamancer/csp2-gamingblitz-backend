@@ -136,12 +136,13 @@ exports.addToCart = async (req, res) => {
     // Save the cart
     await cart.save();
 
-    // Return the updated cart's items as an array
+    // Return the updated cart items as an array - this matches what the tests expect
     res.status(200).json(cart.cartItems);
   } catch (error) {
     errorHandler(error, res);
   }
 };
+
 
 // Update Cart Quantity ORIGINAL
 /*exports.updateCartQuantity = async (req, res) => {
@@ -211,7 +212,7 @@ exports.updateCartQuantity = async (req, res) => {
     }
 
     // Find the user's cart
-    let cart = await Cart.findOne({ userId }).populate('cartItems.productId', 'price');
+    let cart = await Cart.findOne({ userId });
 
     // If no cart is found, return an error
     if (!cart) {
@@ -219,7 +220,7 @@ exports.updateCartQuantity = async (req, res) => {
     }
 
     // Find the index of the item to be updated in the cart
-    const itemIndex = cart.cartItems.findIndex(item => item.productId._id.toString() === productId);
+    const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
 
     // If the item doesn't exist in the cart, return an error
     if (itemIndex === -1) {
@@ -236,7 +237,7 @@ exports.updateCartQuantity = async (req, res) => {
     // Save the updated cart
     await cart.save();
 
-    // Return the updated cart's items as an array
+    // Return the updated cart items as an array - this matches what the tests expect
     res.status(200).json(cart.cartItems);
   } catch (error) {
     errorHandler(error, res);

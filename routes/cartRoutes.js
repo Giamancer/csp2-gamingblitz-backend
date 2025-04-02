@@ -10,11 +10,12 @@ const router = express.Router();
 router.get("/get-cart", verify, cartController.getCart);
 
 // Add To Cart
-router.post("/active/add-to-cart", verify, cartController.addToCart);
+router.post("/add-to-cart", verify, cartController.addToCart);
 
 // Update Cart Quantity
-router.put("/active/update-cart-quantity", verify, cartController.updateCartQuantity);
+router.put("/update-cart-quantity", verify, cartController.updateCartQuantity);
 
+// Active Cart
 router.get("/active", verify, cartController.getActiveCart); 
 
 module.exports = router;
