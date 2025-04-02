@@ -19,7 +19,7 @@ router.get("/get-cart", verify, cartController.getCart);
 router.post("/add-to-cart", verify, cartController.addToCart);
 
 // Update Cart Quantity
-router.patch("/update-cart-quantity", verify, cartController.updateCartQuantity);
+router.put("/update-cart-quantity", verify, cartController.updateCartQuantity);
 
 router.get("/active", verify, cartController.getActiveCart); 
 
