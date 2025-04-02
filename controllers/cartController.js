@@ -7,22 +7,45 @@ const Product = require("../models/Product");
 const { errorHandler } = auth;
 
 // Retrieve User's Cart
-exports.getCart = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const userCart = await Cart.findOne({ userId: userId })
-      .populate('cartItems.productId'); // Updated path to 'cartItems.productId'
+module.exports.getCart = (req, res) => {
+    console.log("getCart accessed");
+    const userId = req.user.id; // Extract user ID from JWT
+    console.log("User ID:", userId);
 
-    if (!userCart) {
-      return res.status(404).json({ message: "Cart not found" });
-    }
+    Cart.findOne({ userId })
+        .then((cart) => {
+            if (!cart) {
+                console.log("No cart found for user:", userId);
+                // Instead of 404, return an empty cart structure
+                return res.status(200).json({
+                    cart: {
+                        cartItems: [],
+                        totalPrice: 0
+                    }
+                });
+            }
 
-    res.status(200).json(userCart);
-  } catch (error) {
-    errorHandler(error, res);
-  }
+            console.log("Cart found:", cart);
+            res.status(200).json({
+                cart: {
+                    _id: cart._id,
+                    userId: cart.userId,
+                    cartItems: cart.cartItems.map(item => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        subtotal: item.subtotal
+                    })),
+                    totalPrice: cart.totalPrice,
+                    orderedOn: cart.orderedOn,
+                    __v: cart.__v
+                }
+            });
+        })
+        .catch((error) => {
+            console.error("Error retrieving cart:", error);
+            res.status(500).json({ message: "Error retrieving cart.", error: error.message });
+        });
 };
-
 // Add to Cart
 exports.addToCart = async (req, res) => {
   try {
