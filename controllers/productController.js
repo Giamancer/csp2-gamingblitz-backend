@@ -55,7 +55,8 @@ module.exports.getAllProducts = (req, res) => {
 exports.getActiveProducts = async (req, res) => {
     try {
         const activeProducts = await Product.find({ isActive: true }); // Fetch active products
-        res.status(200).json(activeProducts); // Send response
+        // If no active products, return an empty array
+        res.status(200).json(activeProducts || []);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
