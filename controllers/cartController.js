@@ -90,39 +90,35 @@ module.exports.getCart = (req, res) => {
 };
 */
 
+// Add To Cart - ensure it's adding items properly
 exports.addToCart = async (req, res) => {
   try {
+    console.log("addToCart called with body:", req.body);
     const { productId, quantity } = req.body;
     const userId = req.user.id;
 
-    // Ensure quantity is valid
-    if (isNaN(quantity) || quantity <= 0) {
-      return res.status(400).json({ message: 'Invalid quantity' });
-    }
-
-    // Find the active product by its ID
-    const product = await Product.findById(productId);
-    if (!product || !product.isActive) {
-      return res.status(404).json({ message: 'Product is not available or not active' });
-    }
-
-    // Find the user's cart
+    // Find or create cart
     let cart = await Cart.findOne({ userId });
-
-    // If the cart doesn't exist, create a new one
     if (!cart) {
       cart = new Cart({ userId, cartItems: [], totalPrice: 0 });
     }
 
-    // Check if the product already exists in the cart
-    const existingItem = cart.cartItems.find(item => item.productId.toString() === productId);
+    // Find product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
 
-    if (existingItem) {
-      // If the item exists, update the quantity and subtotal
-      existingItem.quantity += quantity;
-      existingItem.subtotal = existingItem.quantity * product.price;
+    // Add or update item
+    const existingItemIndex = cart.cartItems.findIndex(item => 
+      item.productId.toString() === productId
+    );
+
+    if (existingItemIndex >= 0) {
+      cart.cartItems[existingItemIndex].quantity += quantity;
+      cart.cartItems[existingItemIndex].subtotal = 
+        cart.cartItems[existingItemIndex].quantity * product.price;
     } else {
-      // If the item doesn't exist, add it to the cart
       cart.cartItems.push({
         productId,
         quantity,
@@ -130,16 +126,17 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Update the total price of the cart
-    cart.totalPrice = cart.cartItems.reduce((total, item) => total + item.subtotal, 0);
-
-    // Save the cart
+    // Update total price
+    cart.totalPrice = cart.cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+    
+    // Save cart
     await cart.save();
-
-    // Return the updated cart items as an array - this matches what the tests expect
-    res.status(200).json(cart.cartItems);
+    
+    console.log("Cart saved successfully:", cart.cartItems);
+    return res.status(200).json(cart.cartItems);
   } catch (error) {
-    errorHandler(error, res);
+    console.error("Error in addToCart:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -197,66 +194,81 @@ exports.addToCart = async (req, res) => {
 */
 exports.updateCartQuantity = async (req, res) => {
   try {
+    console.log("updateCartQuantity called with body:", req.body);
     const { productId, newQuantity } = req.body;
     const userId = req.user.id;
 
-    // Ensure the newQuantity is a valid number and greater than 0
-    if (isNaN(newQuantity) || newQuantity <= 0) {
+    // Validate quantity
+    if (!newQuantity || newQuantity <= 0) {
       return res.status(400).json({ message: 'Invalid quantity' });
     }
 
-    // Find the active product by its ID
-    const product = await Product.findById(productId);
-    if (!product || !product.isActive) {
-      return res.status(404).json({ message: 'Product is not available or not active' });
-    }
-
-    // Find the user's cart
-    let cart = await Cart.findOne({ userId });
-
-    // If no cart is found, return an error
+    // Find cart
+    const cart = await Cart.findOne({ userId });
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
 
-    // Find the index of the item to be updated in the cart
-    const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
-
-    // If the item doesn't exist in the cart, return an error
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: 'Item not found in the cart' });
+    // Find product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Update the quantity and recalculate the subtotal
+    // Find item
+    const itemIndex = cart.cartItems.findIndex(item => 
+      item.productId.toString() === productId
+    );
+    
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: 'Item not found in cart' });
+    }
+
+    // Update item
     cart.cartItems[itemIndex].quantity = newQuantity;
     cart.cartItems[itemIndex].subtotal = newQuantity * product.price;
 
-    // Update the total price
-    cart.totalPrice = cart.cartItems.reduce((total, item) => total + item.subtotal, 0);
-
-    // Save the updated cart
+    // Update total price
+    cart.totalPrice = cart.cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+    
+    // Save cart
     await cart.save();
-
-    // Return the updated cart items as an array - this matches what the tests expect
-    res.status(200).json(cart.cartItems);
+    
+    console.log("Cart updated successfully:", cart.cartItems);
+    return res.status(200).json(cart.cartItems);
   } catch (error) {
-    errorHandler(error, res);
+    console.error("Error in updateCartQuantity:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
-module.exports.getActiveCart = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const cart = await Cart.findOne({ userId });
-
-        if (!cart || cart.cartItems.length === 0) {
-            // Return empty array for empty cart
-            return res.status(200).json([]);
-        }
-
-        // Return cartItems as an array directly
-        res.status(200).json(cart.cartItems);
-    } catch (error) {
-        res.status(500).json({ message: "Error retrieving active cart.", error: error.message });
+exports.getActiveCart = async (req, res) => {
+  try {
+    console.log("getActiveCart called for user:", req.user.id);
+    const userId = req.user.id;
+    
+    // Find cart
+    const cart = await Cart.findOne({ userId });
+    
+    // Return empty array if no cart or empty cart
+    if (!cart || !cart.cartItems.length === 0) {
+      console.log("No cart items found, returning empty array");
+      return res.status(200).json([]);
     }
+    
+    // Option: Filter to only include items with active products
+    const activeCartItems = [];
+    for (const item of cart.cartItems) {
+      const product = await Product.findById(item.productId);
+      if (product && product.isActive) {
+        activeCartItems.push(item);
+      }
+    }
+    
+    console.log("Returning active cart items:", activeCartItems);
+    return res.status(200).json(activeCartItems);
+  } catch (error) {
+    console.error("Error in getActiveCart:", error);
+    return res.status(500).json({ message: error.message });
+  }
 };
