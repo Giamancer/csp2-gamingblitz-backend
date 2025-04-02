@@ -139,3 +139,20 @@ exports.updateCartQuantity = async (req, res) => {
     errorHandler(error, res);
   }
 };
+
+module.exports.getActiveCart = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const cart = await Cart.findOne({ userId });
+
+        if (!cart || cart.cartItems.length === 0) {
+            // Return empty array for empty cart
+            return res.status(200).json([]);
+        }
+
+        // Return cartItems as an array directly
+        res.status(200).json(cart.cartItems);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving active cart.", error: error.message });
+    }
+};
