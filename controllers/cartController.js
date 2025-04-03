@@ -85,7 +85,7 @@ module.exports.addToCart = async (req, res) => {
 
 
 // Change Product Quantity in Cart
-module.exports.updateCartItem = async (req, res) => {
+module.exports.updateCartQuantity = async (req, res) => {
     try {
         if (req.user.isAdmin) {
             return res.status(403).send({ message: "Admin is forbidden" });

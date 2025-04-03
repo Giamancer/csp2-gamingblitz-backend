@@ -20,7 +20,7 @@ router.get("/get-cart", verify, cartController.getCart);
 router.patch("/update-cart-quantity", verify, cartController.updateCartQuantity);
 
 
-module.exports = router;
+//module.exports = router;
 
 
 //=======
