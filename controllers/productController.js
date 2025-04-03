@@ -54,9 +54,11 @@ module.exports.getAllProducts = (req, res) => {
 // Retrieve All Active Products
 exports.getActiveProducts = async (req, res) => {
     try {
-        const activeProducts = await Product.find({ isActive: true }); // Fetch active products
-        res.status(200).json(activeProducts); // Send response
+        const activeProducts = await Product.find({ isActive: true });
+        console.log("Active products:", activeProducts);
+        res.status(200).json(activeProducts || []);
     } catch (error) {
+        console.error("Error getting active products:", error);
         res.status(500).json({ error: error.message });
     }
 };
