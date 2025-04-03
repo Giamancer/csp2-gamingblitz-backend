@@ -7,7 +7,7 @@ const { verifyJWT } = require("../auth");
 
 const router = express.Router();
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
 router.get("/active", verify, cartController.getActiveCart);
 
 // Add to Cart (Non-Admin)
@@ -23,7 +23,7 @@ router.patch("/update-cart-quantity", verify, cartController.updateCartQuantity)
 module.exports = router;
 
 
-=======
+//=======
 // Retrieve User's Cart
 router.get("/get-cart", verify, cartController.getCart);
 
@@ -47,4 +47,4 @@ router.get("/active", verify, (req, res, next) => {
 }, cartController.getActiveCart);
 
 module.exports = router;
->>>>>>> d4d3799122b306b22e34c4d7acf8ebbd1eb75338
+//>>>>>>> d4d3799122b306b22e34c4d7acf8ebbd1eb75338
