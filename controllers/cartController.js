@@ -215,3 +215,22 @@ module.exports.clearCart = async (req, res) => {
         return res.status(500).send({ error: { message: error.message, errorCode: "SERVER_ERROR" } });
     }
 };
+
+
+module.exports.getActiveCart = async (req, res) => {
+    try {
+        const userId = req.user.id; // Extract user ID from the verified token
+        
+        // Find the user's active cart
+        const activeCart = await Cart.findOne({ userId, isActive: true }).populate("items.productId");
+
+        if (!activeCart) {
+            return res.status(404).json({ message: "No active cart found." });
+        }
+
+        res.status(200).json(activeCart);
+    } catch (error) {
+        console.error("Error fetching active cart:", error);
+        res.status(500).json({ message: "Internal server error." });
+    }
+};
