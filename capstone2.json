@@ -1,4 +1,11 @@
-/b3/users
-/b3/products
-/b3/order
-/b3/cart
+{
+    "url": "",
+    "routesPrefix": {
+
+        "users": "/b3/users",
+        "products": "/b3/products",
+        "orders": "/b3/order",
+        "cart": "/b3/cart"
+
+    }
+}
