@@ -52,42 +52,33 @@ module.exports.getCart = (req, res) => {
 exports.addToCart = async (req, res) => {
     try {
         const { productId, price, quantity } = req.body;
-        
-        // Check if this product is already in cart
-        const existingCartItem = await Cart.findOne({ 
+
+        const existingCartItem = await Cart.findOne({
             userId: req.user.id,
             productId: productId
         });
-        
+
         if (existingCartItem) {
-            // Update quantity and subtotal if product already in cart
             existingCartItem.quantity += quantity;
             existingCartItem.subtotal = existingCartItem.price * existingCartItem.quantity;
             await existingCartItem.save();
-            
-            // Get all cart items to return
-            const allCartItems = await Cart.find({ userId: req.user.id });
-            return res.status(200).json(allCartItems);
-        } 
-        
-        // Calculate subtotal
-        const subtotal = price * quantity;
-        
-        // Create new cart item
-        const newCartItem = new Cart({
-            userId: req.user.id,
-            productId,
-            price,
-            quantity,
-            subtotal
-        });
-        
-        await newCartItem.save();
-        
-        // Get all cart items to return
-        const allCartItems = await Cart.find({ userId: req.user.id });
+        } else {
+            const subtotal = price * quantity;
+            const newCartItem = new Cart({
+                userId: req.user.id,
+                productId,
+                price,
+                quantity,
+                subtotal
+            });
+            await newCartItem.save();
+        }
+
+        // ✅ Return all cart items with populated productId
+        const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
+                                       .populate("productId");
         res.status(200).json(allCartItems);
-        
+
     } catch (error) {
         console.error("Error adding to cart:", error);
         res.status(500).json({ error: error.message });
@@ -96,36 +87,33 @@ exports.addToCart = async (req, res) => {
 
 
 
-
 // Change Product Quantity in Cart
 exports.updateCartQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-        
-        // Find cart item
-        const cartItem = await Cart.findOne({ 
+
+        const cartItem = await Cart.findOne({
             userId: req.user.id,
             productId: productId
         });
-        
+
         if (!cartItem) {
             return res.status(404).json({ error: "Product not found in cart" });
         }
-        
+
         if (quantity <= 0) {
-            // Remove item if quantity is 0 or negative
             await Cart.deleteOne({ _id: cartItem._id });
         } else {
-            // Update quantity and subtotal
             cartItem.quantity = quantity;
             cartItem.subtotal = cartItem.price * quantity;
             await cartItem.save();
         }
-        
-        // Get all cart items to return
-        const allCartItems = await Cart.find({ userId: req.user.id });
+
+        // ✅ Return all cart items with populated productId
+        const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
+                                       .populate("productId");
         res.status(200).json(allCartItems);
-        
+
     } catch (error) {
         console.error("Error updating cart quantity:", error);
         res.status(500).json({ error: error.message });
