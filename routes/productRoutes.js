@@ -14,7 +14,7 @@ router.post("/", verify, verifyAdmin, productController.createProduct);
 router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
 // Retrieve All Active Products
-router.get("/active", verify, verifyAdmin, productController.getActiveProducts);
+router.get("/active-products", verify, verifyAdmin, productController.getActiveProducts);
 
 // Retrieve Single Product
 router.get("/:productId", productController.getProduct);
