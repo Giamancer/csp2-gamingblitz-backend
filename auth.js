@@ -45,51 +45,36 @@ Analogy
 */
 
 module.exports.verify = (req, res, next) => {
-    console.log(req.headers.authorization);
+    console.log("Authorization header:", req.headers.authorization);
 
-    // "req.headers.authorization" contains sensitive data and especially our token
     let token = req.headers.authorization;
 
-    // This if statement will first check if a token variable contains "undefined" or a proper jwt.  we will check token's data type with "typeof", if it is "undefined" we will send a message to the client. Else if it is not, then we return the token.
-    if(typeof token === "undefined"){
+    if (typeof token === "undefined") {
+        console.log("No token provided in the request.");
         return res.send({ auth: "Failed. No Token" });
     } else {
-        console.log(token);     
-        token = token.slice(7, token.length);
-        console.log(token);
+        console.log("Received token:", token);     
+        token = token.slice(7, token.length); // Remove the 'Bearer ' prefix
+        console.log("Token after slicing:", token);
 
-        //[SECTION] Token decryption
-        /*
-        Analogy
-            Open the gift and get the content
-        - Validate the token using the "verify" method decrypting the token using the secret code.
-        - token - the jwt token passed from the request headers.
-        - JWT_SECRET_KEY - the secret word from earlier which validates our token.
-        - function(err,decodedToken) - err contains the error in verification, decodedToken contains the decoded data within the token after verification
-        */
-        // "err" is a built-in variable of express to handle errors
-        jwt.verify(token, process.env.JWT_SECRET_KEY, function(err, decodedToken){
-            
-            //If there was an error in verification, an erratic token, a wrong secret within the token, we will send a message to the client.
-            if(err){
+        // Validate the token using JWT_SECRET_KEY
+        jwt.verify(token, process.env.JWT_SECRET_KEY, function(err, decodedToken) {
+            if (err) {
+                console.error("JWT verification failed:", err.message); // Log error message
                 return res.status(403).send({
                     auth: "Failed",
                     message: err.message
                 });
-
             } else {
+                console.log("Decoded token data:", decodedToken); // Log the decoded token
 
-                // Contains the data from our token
-                console.log("result from verify method:")
-                console.log(decodedToken);
-                
-                // Else, if our token is verified to be correct, then we will update the request and add the user's decoded details.
+                // Add the decoded token data to the request object for further use
                 req.user = decodedToken;
 
-                // next() is an expressJS function which allows us to move to the next function in the route. It also passes details of the request and response to the next function/middleware.
+                // Proceed to the next middleware or route handler
                 next();
             }
-        })
+        });
     }
 };
 
