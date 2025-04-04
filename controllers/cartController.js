@@ -220,13 +220,15 @@ module.exports.clearCart = async (req, res) => {
 module.exports.getActiveCart = async (req, res) => {
     try {
         const userId = req.user.id;
+        
+        // Find the active cart for the user
         const activeCart = await Cart.findOne({ userId, isActive: true }).populate("cartItems.productId");
 
         if (!activeCart) {
-            return res.status(200).json([]); // Always return an array
+            return res.status(200).json([]); // Return an empty array if no active cart
         }
 
-        return res.status(200).json(activeCart.cartItems);
+        return res.status(200).json(activeCart.cartItems); // Return cartItems array
     } catch (error) {
         console.error("Error fetching active cart:", error);
         return res.status(500).json({ message: "Internal server error." });
