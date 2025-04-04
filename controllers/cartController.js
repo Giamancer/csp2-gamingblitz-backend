@@ -217,9 +217,12 @@ module.exports.clearCart = async (req, res) => {
 
 exports.getActiveCart = async (req, res) => {
     try {
-        const activeCartItems = await Cart.find({ userId: req.user.id });
-        console.log("Active cart items:", activeCartItems);
-        res.status(200).json(activeCartItems || []);
+        const activeCartItems = await Cart.find({ userId: req.user.id, isActive: true })
+            .populate('productId');
+
+        console.log("Active cart items:", JSON.stringify(activeCartItems, null, 2));
+
+        res.status(200).json(Array.isArray(activeCartItems) ? activeCartItems : []);
     } catch (error) {
         console.error("Error getting active cart:", error);
         res.status(500).json({ error: error.message });
