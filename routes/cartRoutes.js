@@ -18,7 +18,5 @@ router.get("/get-cart", verify, cartController.getCart);
 // Update Cart Quantity
 router.put("/update-cart-quantity", verify, cartController.updateCartQuantity);
 
-// Retrieve User's Cart
-router.get("/get-cart", verify, cartController.getCart);
-
 module.exports = router;
+

@@ -27,17 +27,24 @@ module.exports.getCart = (req, res) => {
             }
 
             console.log("Cart found:", cart);
+
+            // Assuming that 'cart' contains a single product entry
+            const cartItems = [{
+                productId: cart.productId,
+                quantity: cart.quantity,
+                subtotal: cart.subtotal,
+                price: cart.price
+            }];
+
+            // Return the cart structure with the proper cart items and total price
+            const totalPrice = cartItems.reduce((total, item) => total + item.subtotal, 0);
+
             res.status(200).json({
                 cart: {
                     _id: cart._id,
                     userId: cart.userId,
-                    cartItems: cart.cartItems.map(item => ({
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        subtotal: item.subtotal
-                    })),
-                    totalPrice: cart.totalPrice,
-                    orderedOn: cart.orderedOn,
+                    cartItems: cartItems,
+                    totalPrice: totalPrice,
                     __v: cart.__v
                 }
             });
@@ -74,10 +81,10 @@ exports.addToCart = async (req, res) => {
             await newCartItem.save();
         }
 
-        // ✅ Return all cart items with populated productId
+        // ✅ Return cart items directly as an array (no wrapping in 'cartItems')
         const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
                                        .populate("productId");
-        res.status(200).json(allCartItems);
+        res.status(200).json(allCartItems); // Return directly without wrapping
 
     } catch (error) {
         console.error("Error adding to cart:", error);
@@ -109,10 +116,10 @@ exports.updateCartQuantity = async (req, res) => {
             await cartItem.save();
         }
 
-        // ✅ Return all cart items with populated productId
+        // ✅ Return cart items directly as an array (no wrapping in 'cartItems')
         const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
                                        .populate("productId");
-        res.status(200).json(allCartItems);
+        res.status(200).json(allCartItems); // Return directly without wrapping
 
     } catch (error) {
         console.error("Error updating cart quantity:", error);
@@ -210,10 +217,8 @@ module.exports.getActiveCart = async (req, res) => {
 
         console.log("Active cart items:", JSON.stringify(activeCartItems, null, 2));
 
-        // Return wrapped in 'cartItems' to ensure proper structure
-        res.status(200).json({
-            cartItems: activeCartItems,  // Ensures the structure is an array within an object
-        });
+        // Directly return the array instead of wrapping it in an object
+        res.status(200).json(activeCartItems);
     } catch (error) {
         console.error("Error getting active cart:", error);
         res.status(500).json({ error: error.message });
