@@ -14,10 +14,11 @@ module.exports.getCart = async (req, res) => {
             return res.status(403).send({ message: "Admin is forbidden" });
         }
 
-        const cart = await Cart.findOne({ userId: req.user.id });
+        let cart = await Cart.findOne({ userId: req.user.id });
 
         if (!cart) {
-            return res.status(404).send({ message: "Cart is empty" });
+            cart = new Cart({ userId: req.user.id, cartItems: [], totalPrice: 0 });
+            await cart.save(); // Ensure the user always has a cart
         }
 
         return res.status(200).send({
@@ -32,7 +33,6 @@ module.exports.getCart = async (req, res) => {
         return res.status(500).send({ error: { message: error.message, errorCode: "SERVER_ERROR" } });
     }
 };
-
 
 
 // Add to cart
@@ -219,18 +219,16 @@ module.exports.clearCart = async (req, res) => {
 
 module.exports.getActiveCart = async (req, res) => {
     try {
-        const userId = req.user.id; // Extract user ID from the verified token
-        
-        // Find the user's active cart
-        const activeCart = await Cart.findOne({ userId, isActive: true }).populate("items.productId");
+        const userId = req.user.id;
+        const activeCart = await Cart.findOne({ userId, isActive: true }).populate("cartItems.productId");
 
         if (!activeCart) {
-            return res.status(404).json({ message: "No active cart found." });
+            return res.status(200).json([]); // Always return an array
         }
 
-        res.status(200).json(activeCart);
+        return res.status(200).json(activeCart.cartItems);
     } catch (error) {
         console.error("Error fetching active cart:", error);
-        res.status(500).json({ message: "Internal server error." });
+        return res.status(500).json({ message: "Internal server error." });
     }
 };
