@@ -7,7 +7,7 @@ const { verify, verifyAdmin } = auth;
 const router = express.Router();
 
 // Get Active Cart
-router.get("/active-cart-items", verify, cartController.getActiveCart);
+router.get("/active", verify, cartController.getActiveCart);
 
 // Add to Cart
 router.post("/add-to-cart", verify, cartController.addToCart);
