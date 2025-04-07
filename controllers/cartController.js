@@ -212,12 +212,12 @@ module.exports.clearCart = async (req, res) => {
 
 module.exports.getActiveCart = async (req, res) => {
     try {
-        const activeCartItems = await Cart.find({ userId: req.user.id, isActive: true })
-            .populate('productId');
+        const activeCartItems = await Cart.find({ userId: req.user.id, isActive: true }).populate('productId');
 
-        console.log("Active cart items:", JSON.stringify(activeCartItems, null, 2));
+        if (!Array.isArray(activeCartItems)) {
+            return res.status(500).json({ error: 'Cart retrieval failed. Expected an array.' });
+        }
 
-        // Directly return the array instead of wrapping it in an object
         res.status(200).json(activeCartItems);
     } catch (error) {
         console.error("Error getting active cart:", error);
