@@ -7,220 +7,169 @@ const auth = require("../auth");
 const { errorHandler } = auth;
 
 
-// Retrieve user's cart
 module.exports.getCart = (req, res) => {
-    console.log("getCart accessed");
-    const userId = req.user.id; // Extract user ID from JWT
-    console.log("User ID:", userId);
+    const userId = req.user.id; // Extracted from authenticated request
 
     Cart.findOne({ userId })
-        .then((cart) => {
+        .then(cart => {
             if (!cart) {
-                console.log("No cart found for user:", userId);
-                // Instead of 404, return an empty cart structure
-                return res.status(200).json({
-                    cart: {
-                        cartItems: [],
-                        totalPrice: 0
-                    }
+                return res.status(404).json({ message: "Cart not found" });
+            }
+            res.status(200).json(cart);
+        })
+        .catch(error => errorHandler(error, req, res)); 
+};
+
+module.exports.addToCart = (req, res) => {
+    const userId = req.user.id; // Assuming user is authenticated and extracted from JWT
+    const { productId, quantity, subtotal } = req.body;
+
+    Cart.findOne({ userId })
+        .then(cart => {
+            if (!cart) {
+                // No cart found, create a new one
+                const newCart = new Cart({
+                    userId,
+                    cartItems: [{ productId, quantity, subtotal }],
+                    totalPrice: subtotal
+                });
+                return newCart.save();
+            } else {
+                // Check if product already exists in cart
+                const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
+                
+                if (itemIndex > -1) {
+                    // Product exists, update quantity and subtotal
+                    cart.cartItems[itemIndex].quantity += quantity;
+                    cart.cartItems[itemIndex].subtotal += subtotal;
+                } else {
+                    // Add new product to cart
+                    cart.cartItems.push({ productId, quantity, subtotal });
+                }
+
+                // Update total price
+                cart.totalPrice += subtotal;
+                return cart.save();
+            }
+        })
+        .then(updatedCart => res.json({ message: "Cart updated successfully", cart: updatedCart }))
+        .catch(error => errorHandler(error, req, res)); 
+};
+
+
+module.exports.updateCartQuantity = (req, res) => {
+    const { productId, newQuantity } = req.body;
+
+    // Validate quantity
+    if (typeof newQuantity !== 'number' || isNaN(newQuantity)) {
+        return res.status(400).send({ message: "Invalid quantity" });
+    }
+
+    Cart.findOne({ userId: req.user.id })
+        .then(cart => {
+            if (!cart) return res.status(404).send({ message: "Cart not found" });
+
+            const cartItem = cart.cartItems.find(item => item.productId.equals(productId));
+            if (!cartItem) return res.status(404).send({ message: "Product not in cart" });
+
+            if (newQuantity <= 0) {
+                cart.cartItems = cart.cartItems.filter(item => !item.productId.equals(productId));
+                cart.totalPrice = cart.cartItems.reduce((acc, item) => acc + item.subtotal, 0);
+                return cart.save().then(updatedCart => {
+                    return res.status(200).send({
+                        success: true,
+                        message: "Cart updated successfully",
+                        cart: updatedCart
+                    });
                 });
             }
 
-            console.log("Cart found:", cart);
+            return Product.findById(productId).then(product => {
+                if (!product) return res.status(404).send({ message: "Product not found" });
 
-            // Assuming that 'cart' contains a single product entry
-            const cartItems = [{
-                productId: cart.productId,
-                quantity: cart.quantity,
-                subtotal: cart.subtotal,
-                price: cart.price
-            }];
-
-            // Return the cart structure with the proper cart items and total price
-            const totalPrice = cartItems.reduce((total, item) => total + item.subtotal, 0);
-
-            res.status(200).json({
-                cart: {
-                    _id: cart._id,
-                    userId: cart.userId,
-                    cartItems: cartItems,
-                    totalPrice: totalPrice,
-                    __v: cart.__v
+                // Check product price too
+                if (typeof product.price !== 'number' || isNaN(product.price)) {
+                    return res.status(500).send({ message: "Invalid product price" });
                 }
+
+                cartItem.quantity = newQuantity;
+                cartItem.subtotal = newQuantity * product.price;
+
+                cart.totalPrice = cart.cartItems.reduce((acc, item) => acc + item.subtotal, 0);
+
+                return cart.save().then(updatedCart => {
+                    return res.status(200).send({
+                        success: true,
+                        message: "Cart updated successfully",
+                        cart: updatedCart
+                    });
+                });
             });
         })
-        .catch((error) => {
-            console.error("Error retrieving cart:", error);
-            res.status(500).json({ message: "Error retrieving cart.", error: error.message });
-        });
-};
-
-// Add to cart
-exports.addToCart = async (req, res) => {
-    try {
-        const { productId, price, quantity } = req.body;
-
-        const existingCartItem = await Cart.findOne({
-            userId: req.user.id,
-            productId: productId
-        });
-
-        if (existingCartItem) {
-            existingCartItem.quantity += quantity;
-            existingCartItem.subtotal = existingCartItem.price * existingCartItem.quantity;
-            await existingCartItem.save();
-        } else {
-            const subtotal = price * quantity;
-            const newCartItem = new Cart({
-                userId: req.user.id,
-                productId,
-                price,
-                quantity,
-                subtotal
-            });
-            await newCartItem.save();
-        }
-
-        // ✅ Return cart items directly as an array (no wrapping in 'cartItems')
-        const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
-                                       .populate("productId");
-        res.status(200).json(allCartItems); // Return directly without wrapping
-
-    } catch (error) {
-        console.error("Error adding to cart:", error);
-        res.status(500).json({ error: error.message });
-    }
+        .catch(error => errorHandler(error, req, res));
 };
 
 
-
-// Change Product Quantity in Cart
-exports.updateCartQuantity = async (req, res) => {
-    try {
-        const { productId, quantity } = req.body;
-
-        const cartItem = await Cart.findOne({
-            userId: req.user.id,
-            productId: productId
-        });
-
-        if (!cartItem) {
-            return res.status(404).json({ error: "Product not found in cart" });
-        }
-
-        if (quantity <= 0) {
-            await Cart.deleteOne({ _id: cartItem._id });
-        } else {
-            cartItem.quantity = quantity;
-            cartItem.subtotal = cartItem.price * quantity;
-            await cartItem.save();
-        }
-
-        // ✅ Return cart items directly as an array (no wrapping in 'cartItems')
-        const allCartItems = await Cart.find({ userId: req.user.id, isActive: true })
-                                       .populate("productId");
-        res.status(200).json(allCartItems); // Return directly without wrapping
-
-    } catch (error) {
-        console.error("Error updating cart quantity:", error);
-        res.status(500).json({ error: error.message });
-    }
-};
-
-
-// Remove Item From Cart
+// Remove Item from Cart
 module.exports.removeFromCart = async (req, res) => {
     try {
-        if (req.user.isAdmin) {
-            return res.status(403).send({ message: "Admin is forbidden" });
-        }
+        const userId = req.user.id;
+        const productId = req.params.productId;
 
-        const { productId } = req.params;
-
-        if (!productId) {
-            return res.status(400).send({ message: "Invalid product ID" });
-        }
-
-        let cart = await Cart.findOne({ userId: req.user.id });
+        // Find the user's cart
+        const cart = await Cart.findOne({ userId });
         if (!cart) {
-            return res.status(404).send({ message: "Cart not found" });
+            return res.status(404).json({ error: "Cart not found" });
         }
 
-        let cartItemIndex = cart.cartItems.findIndex(
-            item => item.productId && item.productId.toString() === productId
-        );
-
-        if (cartItemIndex === -1) {
-            return res.status(404).send({ message: "Item not found in cart" });
+        // Find the product in the cartItems array
+        const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: "Item not found in cart" });
         }
 
-        const removedItem = cart.cartItems.splice(cartItemIndex, 1)[0];
+        // Remove the item from cartItems array
+        const removedItem = cart.cartItems.splice(itemIndex, 1)[0];
 
-        const product = await Product.findById(productId);
-        if (!product) {
-            return res.status(404).send({ message: "Product not found" });
-        }
+        // Update totalPrice
+        cart.totalPrice -= removedItem.subtotal;
 
-        cart.totalPrice -= product.price * removedItem.quantity;
-        if (cart.totalPrice < 0) cart.totalPrice = 0;
+        // Save the updated cart
+        await cart.save();
 
-        const updatedCart = await cart.save();
-
-        return res.status(200).send({
-            message: "Item removed from cart successfully",
-            updatedCart: updatedCart
-        });
-
+        res.status(200).json({ message: "Item removed from cart successfully", updatedCart: cart });
     } catch (error) {
-        return res.status(500).send({ error: { message: error.message, errorCode: "SERVER_ERROR" } });
+        res.status(500).json({ error: "Error removing product from cart", error: error.message });
     }
 };
 
-
-//Clear Cart
+// Clear Cart
 module.exports.clearCart = async (req, res) => {
     try {
-        if (req.user.isAdmin) {
-            return res.status(403).send({ message: "Admin is forbidden" });
-        }
+        const userId = req.user.id;
 
-        let cart = await Cart.findOne({ userId: req.user.id });
-
+        // Find the user's cart
+        const cart = await Cart.findOne({ userId });
         if (!cart) {
-            return res.status(404).send({ message: "Cart not found" });
+            return res.status(404).json({ error: "Cart not found" });
         }
 
-        if (cart.cartItems.length === 0) {
-            return res.status(400).send({ message: "Cart is already empty" });
+        // Check if cartItems has at least one item
+        if (cart.cartItems.length > 0) {
+            // Clear the cartItems array
+            cart.cartItems = [];
+            
+            // Reset totalPrice to 0
+            cart.totalPrice = 0;
+
+            // Save the updated cart
+            await cart.save();
+
+            return res.status(200).json({ message: "Cart cleared successfully", cart: cart });
+        } else {
+            return res.status(400).json({ message: "Cart is already empty" });
         }
-
-        cart.cartItems = [];
-        cart.totalPrice = 0;
-
-        const updatedCart = await cart.save();
-
-        return res.status(200).send({
-            message: "Cart cleared successfully",
-            cart: updatedCart
-        });
-
     } catch (error) {
-        return res.status(500).send({ error: { message: error.message, errorCode: "SERVER_ERROR" } });
-    }
-};
-
-
-module.exports.getActiveCart = async (req, res) => {
-    try {
-        const activeCartItems = await Cart.find({ userId: req.user.id, isActive: true }).populate('productId');
-
-        if (!Array.isArray(activeCartItems)) {
-            return res.status(500).json({ error: 'Cart retrieval failed. Expected an array.' });
-        }
-
-        res.status(200).json(activeCartItems);
-    } catch (error) {
-        console.error("Error getting active cart:", error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Error removing items from cart", error: error.message });
     }
 };

@@ -1,22 +1,22 @@
 //[SECTION] Dependencies and Modules
-const express = require("express");
-const cartController = require("../controllers/cartController");
+const express = require('express');
+const cartController = require('../controllers/cart');
 const auth = require("../auth");
-const { verify, verifyAdmin } = auth;
+const { verify } = auth;
 
+//[SECTION] Routing Component
 const router = express.Router();
 
-// Get Active Cart
-router.get("/active", verify, cartController.getActiveCart);
 
-// Add to Cart
-router.post("/active/add-to-cart", verify, cartController.addToCart);
+router.get('/get-cart', verify, cartController.getCart);
 
-// Retrieve User's Cart 
-router.get("/get-cart", verify, cartController.getCart);
+router.post('/add-to-cart', verify, cartController.addToCart);
 
-// Update Cart Quantity
-router.put("/active/update-cart-quantity", verify, cartController.updateCartQuantity);
+router.patch('/update-cart-quantity', verify, cartController.updateCartQuantity);
+
+router.patch("/:productId/remove-from-cart", verify, cartController.removeFromCart);
+
+router.put("/clear-cart", verify, cartController.clearCart);
+
 
 module.exports = router;
-
