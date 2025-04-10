@@ -1,32 +1,27 @@
-//[SECTION] Activity: Dependencies and Modules
-const express = require("express");
-const productController = require("../controllers/productController");
-const auth = require("../auth");
-const {verify, verifyAdmin} = auth;
+const express = require('express');
+const productController = require('../controllers/product');
+const { verify, verifyAdmin } = require("../auth");
 
-//[SECTION] Activity: Routing Component
+//[SECTION] Routing Component
 const router = express.Router();
 
-// Create Product
-router.post("/", verify, verifyAdmin, productController.createProduct);
+router.post("/", verify, verifyAdmin, productController.addProduct);
 
-// Retrieve All Products
 router.get("/all", verify, verifyAdmin, productController.getAllProducts);
 
-// Retrieve All Active Products
-router.get("/active-products", verify, verifyAdmin, productController.getActiveProducts);
+router.get("/active", productController.getActiveProducts);
 
-// Retrieve Single Product
-router.get("/:productId", productController.getProduct);
+router.get("/:productId", productController.getProductById);
 
-// Update Product Info
-router.patch('/:productId/update', verify, verifyAdmin, productController.updateProduct);
+router.patch("/:productId/update", verify, verifyAdmin, productController.updateProduct);
 
-// Archive Product
-router.patch('/:productId/archive', verify, verifyAdmin, productController.archiveProduct);
+router.patch("/:productId/archive", verify, verifyAdmin, productController.archiveProduct);
 
-// Activate Product
-router.patch('/:productId/activate', verify, verifyAdmin, productController.activateProduct);
+router.patch("/:productId/activate", verify, verifyAdmin, productController.activateProduct);
 
+router.post("/search-by-name", productController.searchByName);
+
+
+router.post("/search-by-price", productController.searchByPrice);
 
 module.exports = router;

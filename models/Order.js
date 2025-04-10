@@ -1,33 +1,28 @@
+//[Section] Dependency
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        required: [true, 'User Id is Required']
     },
-    productsOrdered: [
-        {
-            productId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true
-            },
-            quantity: {
-                type: Number,
-                required: true,
-                min: 1
-            },
-            subtotal: {
-                type: Number,
-                required: true
-            }
+    productsOrdered: [{
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: [true, 'Product ID is required']
+        },
+        quantity: {
+            type: Number,
+            required: [true, 'Quantity is required']
+        },
+        subtotal: {
+            type: Number,
+            required: [true, 'Total number is required']
         }
-    ],
+    }],
     totalPrice: {
         type: Number,
-        required: true,
-        default: 0
+        required: [true, 'Price is Required']
     },
     orderedOn: {
         type: Date,
@@ -35,7 +30,6 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
         default: 'Pending'
     }
 });
