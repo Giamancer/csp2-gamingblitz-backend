@@ -1,6 +1,6 @@
 //[SECTION] Dependencies and Modules
 const express = require('express');
-const cartController = require('../controllers/cart');
+const cartController = require('../controllers/cartController');
 const auth = require("../auth");
 const { verify } = auth;
 
