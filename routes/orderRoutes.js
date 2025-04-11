@@ -6,10 +6,10 @@ const { verify, verifyAdmin } = auth;
 
 const router = express.Router();
 
-/*router.post('/enroll', verify, enrollmentController.enroll);
+router.post('/checkout', verify, orderController.createOrder);
 
-router.get('/get-enrollments', verify, enrollmentController.getEnrollments);
+router.get('/my-orders', verify, orderController.retrieveOrder);
 
-router.put('/update-status', verify, verifyAdmin, enrollmentController.updateEnrollmentStatus);
-*/
+router.get('/all-orders', verify, verifyAdmin, orderController.retrieveAllOrders);
+
 module.exports = router;
