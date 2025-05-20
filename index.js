@@ -23,7 +23,9 @@ require('dotenv').config();
 // Creates an "app" variable that stores the result of the "express" function that initializes our express application and allows us access to different methods that will make backend creation easy
 const app = express();
 const corsOptions = {
-	origin: ['http://localhost:3000'],
+	origin: ['http://localhost:3000',
+    'http://zuitt-bootcamp-prod-530-8599-catimbang.s3-website.us-east-1.amazonaws.com/'
+    ],
 	credentials: true,
 	optionsSuccessStatus: 200
 };
