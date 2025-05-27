@@ -21,41 +21,36 @@ module.exports.getCart = (req, res) => {
 };
 
 module.exports.addToCart = (req, res) => {
-    const userId = req.user.id; // Assuming user is authenticated and extracted from JWT
-    const { productId, quantity, subtotal } = req.body;
+  const userId = req.user.id;
+  const { productId, price, quantity } = req.body;
+  const subtotal = price * quantity;  // Calculate subtotal here
 
-    Cart.findOne({ userId })
-        .then(cart => {
-            if (!cart) {
-                // No cart found, create a new one
-                const newCart = new Cart({
-                    userId,
-                    cartItems: [{ productId, quantity, subtotal }],
-                    totalPrice: subtotal
-                });
-                return newCart.save();
-            } else {
-                // Check if product already exists in cart
-                const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
-                
-                if (itemIndex > -1) {
-                    // Product exists, update quantity and subtotal
-                    cart.cartItems[itemIndex].quantity += quantity;
-                    cart.cartItems[itemIndex].subtotal += subtotal;
-                } else {
-                    // Add new product to cart
-                    cart.cartItems.push({ productId, quantity, subtotal });
-                }
+  Cart.findOne({ userId })
+    .then(cart => {
+      if (!cart) {
+        const newCart = new Cart({
+          userId,
+          cartItems: [{ productId, quantity, subtotal }],
+          totalPrice: subtotal
+        });
+        return newCart.save();
+      } else {
+        const itemIndex = cart.cartItems.findIndex(item => item.productId.toString() === productId);
 
-                // Update total price
-                cart.totalPrice += subtotal;
-                return cart.save();
-            }
-        })
-        .then(updatedCart => res.json({ message: "Cart updated successfully", cart: updatedCart }))
-        .catch(error => errorHandler(error, req, res)); 
+        if (itemIndex > -1) {
+          cart.cartItems[itemIndex].quantity += quantity;
+          cart.cartItems[itemIndex].subtotal += subtotal;
+        } else {
+          cart.cartItems.push({ productId, quantity, subtotal });
+        }
+
+        cart.totalPrice += subtotal;
+        return cart.save();
+      }
+    })
+    .then(updatedCart => res.json({ message: "Cart updated successfully", cart: updatedCart }))
+    .catch(error => errorHandler(error, req, res));
 };
-
 
 module.exports.updateCartQuantity = (req, res) => {
     const { productId, newQuantity } = req.body;
