@@ -1,9 +1,9 @@
-//[Section] Dependency
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Add this so populate('userId') works
         required: [true, 'User Id is Required']
     },
     productsOrdered: [{
