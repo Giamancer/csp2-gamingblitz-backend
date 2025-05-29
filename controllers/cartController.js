@@ -6,19 +6,31 @@ const auth = require("../auth");
 
 const { errorHandler } = auth;
 
-
 module.exports.getCart = (req, res) => {
-    const userId = req.user.id; // Extracted from authenticated request
+  const userId = req.user.id; // Extracted from authenticated request
 
-    Cart.findOne({ userId })
-        .then(cart => {
-            if (!cart) {
-                return res.status(404).json({ message: "Cart not found" });
-            }
-            res.status(200).json(cart);
-        })
-        .catch(error => errorHandler(error, req, res)); 
+  Cart.findOne({ userId })
+    .populate('cartItems.productId', 'name price') // Populate product name and price
+    .then(cart => {
+      if (!cart) {
+        return res.status(404).json({ message: "Cart not found" });
+      }
+
+      // Calculate total price dynamically
+      const totalPrice = cart.cartItems.reduce((sum, item) => {
+        const price = item.productId?.price || 0;
+        return sum + price * item.quantity;
+      }, 0);
+
+      // Return the cart data with the calculated totalPrice
+      res.status(200).json({
+        ...cart.toObject(),
+        totalPrice,
+      });
+    })
+    .catch(error => errorHandler(error, req, res));
 };
+
 
 module.exports.addToCart = (req, res) => {
   const userId = req.user.id;
@@ -46,8 +58,8 @@ module.exports.addToCart = (req, res) => {
 
         cart.totalPrice += subtotal;
         return cart.save();
-      }
-    })
+          }
+        })
     .then(updatedCart => res.json({ message: "Cart updated successfully", cart: updatedCart }))
     .catch(error => errorHandler(error, req, res));
 };
