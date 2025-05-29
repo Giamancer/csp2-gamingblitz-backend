@@ -9,6 +9,7 @@ const cartSchema = new mongoose.Schema({
     cartItems: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product', // ✅ This tells Mongoose what to populate
             required: [true, 'Product ID is required']
         },
         quantity: {
