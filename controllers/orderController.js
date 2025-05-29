@@ -71,8 +71,8 @@ module.exports.retrieveOrder = (req, res) => {
 
 // Retrieve All Orders
 module.exports.retrieveAllOrders = (req, res) => {
-    // Fetch all orders
     Order.find()
+        .populate('productsOrdered.productId', 'name price')  // populate product info
         .then(orders => {
             res.status(200).json({ orders });
         })
