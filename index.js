@@ -26,6 +26,7 @@ const corsOptions = {
 	origin: ['http://localhost:3000',
     'http://zuitt-bootcamp-prod-530-8599-catimbang.s3-website.us-east-1.amazonaws.com',
     'http://ec2-3-15-19-15.us-east-2.compute.amazonaws.com/b3', // add your EC2 public URL
+    'https://csp2-gamingblitz-backend.onrender.com/b3'
     ],
 	credentials: true,
 	optionsSuccessStatus: 200
